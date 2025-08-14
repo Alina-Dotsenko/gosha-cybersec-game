@@ -69,13 +69,15 @@
 
   // Player (Goose Gosha)
   const player = {
-    x: W/2, y: H-90, w: 70, h: 80, vx: 0, speed: 280, img: null
+    x: W/2, y: H-90, w: 80, h: 100, vx: 0, speed: 300, img: null
   };
 
-  // Load goose image
-  const gooseImg = new Image();
-  gooseImg.src = 'assets/goose.jpg';
-  player.img = gooseImg;
+  // Sprites
+  const gooseImg = new Image(); gooseImg.src = 'assets/goose.png'; player.img = gooseImg;
+  const imgBox = new Image(); imgBox.src = 'assets/box.png';
+  const imgPhish = new Image(); imgPhish.src = 'assets/phish.png';
+  const imgUsb = new Image(); imgUsb.src = 'assets/usb.png';
+  const imgDdos = new Image(); imgDdos.src = 'assets/ddos.png';
 
   const keys = { left:false, right:false };
 
@@ -99,8 +101,8 @@
     else if (r < 0.9) type = TYPES.USB;
     else type = TYPES.FLOOD;
 
-    const w = type === TYPES.FLOOD ? 55 : 45;
-    const h = type === TYPES.FLOOD ? 26 : 45;
+    const w = type === TYPES.FLOOD ? 64 : 56;
+    const h = type === TYPES.FLOOD ? 40 : 56;
     const x = Math.random() * (W - w);
     const y = -h - 10;
     const vy = speed + Math.random()*speed*0.3 + (level-1)*25;
@@ -160,85 +162,34 @@
     }
   }
 
-  function drawBackground(){
-    ctx.fillStyle = '#eef6ff';
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = '#dde8f6';
-    ctx.fillRect(0,H-120,W,6);
-    ctx.fillRect(0,H-60,W,6);
-  }
-
   function drawPlayer(){
-    if (player.img && player.img.complete){
-      ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
+    const im = player.img;
+    if (im && im.complete){
+      ctx.drawImage(im, player.x, player.y, player.w, player.h);
     } else {
       ctx.fillStyle = '#3bbf6b';
       ctx.fillRect(player.x, player.y, player.w, player.h);
     }
   }
 
-  function drawOrder(x,y,w,h){
-    ctx.fillStyle = '#c78e3f';
-    ctx.fillRect(x,y,w,h);
-    ctx.strokeStyle = '#7b531f';
-    ctx.strokeRect(x+2,y+2,w-4,h-4);
-    ctx.fillStyle = '#e5d2a4';
-    ctx.fillRect(x + w*0.45, y-2, w*0.1, h+4);
-    ctx.fillStyle = '#222';
-    for (let i=0;i<6;i++){
-      ctx.fillRect(x+6+i*3, y+h-10, 2, 8);
-    }
-  }
-
-  function drawPhish(x,y,w,h){
-    ctx.fillStyle = '#e43d3d';
-    ctx.fillRect(x,y,w,h);
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.lineTo(x+w/2,y+h/2);
-    ctx.lineTo(x+w,y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x+w/2-3, y+h/4, 6, h/2);
-    ctx.beginPath();
-    ctx.arc(x+w/2, y+h*0.8, 4, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  function drawUsb(x,y,w,h){
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x,y,w,h);
-    ctx.fillStyle = '#444';
-    ctx.fillRect(x+w*0.75,y+h*0.2,w*0.2,h*0.6);
-    ctx.fillStyle = '#f4f4f4';
-    ctx.beginPath();
-    ctx.arc(x+w*0.35,y+h*0.4,7,0,Math.PI*2);
-    ctx.fill();
-    ctx.fillRect(x+w*0.28,y+h*0.45,14,10);
-    ctx.fillStyle = '#111';
-    ctx.beginPath(); ctx.arc(x+w*0.31,y+h*0.38,2,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x+w*0.39,y+h*0.38,2,0,Math.PI*2); ctx.fill();
-    ctx.fillRect(x+w*0.33,y+h*0.52,8,2);
-  }
-
-  function drawFlood(x,y,w,h){
-    ctx.fillStyle = '#3d7ae4';
-    ctx.fillRect(x,y,w,h);
-    ctx.fillStyle = '#a9c4ff';
-    for (let i=0;i<4;i++){
-      ctx.fillRect(x+6+i*10, y+4+(i%2)*4, 8, h-8);
+  function drawSprite(im, x,y,w,h){
+    if (im && im.complete){
+      const ar = im.width / im.height;
+      let rw = w, rh = h;
+      if (rw/rh > ar) rw = rh*ar; else rh = rw/ar;
+      ctx.drawImage(im, x + (w-rw)/2, y + (h-rh)/2, rw, rh);
+    } else {
+      ctx.fillStyle = '#ccc'; ctx.fillRect(x,y,w,h);
     }
   }
 
   function drawItems(){
     for (const it of items){
       switch(it.type){
-        case TYPES.ORDER: drawOrder(it.x,it.y,it.w,it.h); break;
-        case TYPES.PHISH: drawPhish(it.x,it.y,it.w,it.h); break;
-        case TYPES.USB:   drawUsb(it.x,it.y,it.w,it.h); break;
-        case TYPES.FLOOD: drawFlood(it.x,it.y,it.w,it.h); break;
+        case TYPES.ORDER: drawSprite(imgBox, it.x,it.y,it.w,it.h); break;
+        case TYPES.PHISH: drawSprite(imgPhish, it.x,it.y,it.w,it.h); break;
+        case TYPES.USB:   drawSprite(imgUsb, it.x,it.y,it.w,it.h); break;
+        case TYPES.FLOOD: drawSprite(imgDdos, it.x,it.y,it.w,it.h); break;
       }
     }
   }
@@ -250,24 +201,20 @@
   }
 
   function loop(ts){
-    if (!running){ last = ts; requestAnimationFrame(loop); return; }
-    const dt = Math.min(0.033, (ts - last)/1000);
-    last = ts;
-
+    if (!running){ requestAnimationFrame(loop); return; }
+    const dt = Math.min(0.033, (ts - (loop.last||ts))/1000);
+    loop.last = ts;
     update(dt);
-
     ctx.clearRect(0,0,W,H);
-    drawBackground();
     drawItems();
     drawPlayer();
     drawHud();
-
     requestAnimationFrame(loop);
   }
 
   function toggleRun(){
     running = !running;
-    if (running){ last = performance.now(); SFX.start(); }
+    if (running){ loop.last = performance.now(); SFX.start(); }
   }
 
   function restart(){
@@ -285,25 +232,25 @@
     gameEnded = true;
     SFX.over();
     // overlay
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = '#fff';
-    ctx.font = '28px system-ui, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Игра окончена! Итог: ' + score, W/2, H/2 - 10);
-    ctx.font = '16px system-ui, Arial';
-    ctx.fillText('Введи имя для таблицы рекордов в появившемся окне.', W/2, H/2 + 20);
-    ctx.restore();
-
-    // Prompt for name (non-blocking slight delay to allow overlay to draw)
+    const W = canvas.width, H = canvas.height;
+    const ctx2 = ctx;
+    ctx2.save();
+    ctx2.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx2.fillRect(0,0,W,H);
+    ctx2.fillStyle = '#fff';
+    ctx2.font = '28px system-ui, Arial';
+    ctx2.textAlign = 'center';
+    ctx2.fillText('Игра окончена! Итог: ' + score, W/2, H/2 - 10);
+    ctx2.font = '16px system-ui, Arial';
+    ctx2.fillText('Введи имя для таблицы рекордов в появившемся окне.', W/2, H/2 + 20);
+    ctx2.restore();
     setTimeout(() => {
       const name = (prompt('Твоё имя для таблицы рекордов?', 'Гость') || 'Гость').slice(0,20);
       addToLB(name, score);
     }, 50);
   }
 
-  // keyboard controls
+  // keyboard
   window.addEventListener('keydown', (e) => {
     if (e.code === 'ArrowLeft') keys.left = true;
     if (e.code === 'ArrowRight') keys.right = true;
@@ -314,35 +261,27 @@
     if (e.code === 'ArrowRight') keys.right = false;
   });
 
-  // mouse move control
+  // mouse
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = (e.clientX - rect.left) / rect.width * canvas.width;
-    player.x = clamp(mx - player.w/2, 0, W - player.w);
+    player.x = Math.max(0, Math.min(W - player.w, mx - player.w/2));
   });
 
-  // touch/mobile controls
+  // touch/mobile
   if (btnLeft && btnRight && btnPause){
-    let leftHeld = false, rightHeld = false;
-    const set = (btn, val, key) => {
-      const on = () => { keys[key] = true; };
-      const off = () => { keys[key] = false; };
-      btn.addEventListener('touchstart', (e)=>{ e.preventDefault(); keys[key] = true; });
-      btn.addEventListener('touchend',   (e)=>{ e.preventDefault(); keys[key] = false; });
-      btn.addEventListener('mousedown', ()=>{ keys[key] = true; });
-      btn.addEventListener('mouseup',   ()=>{ keys[key] = false; });
-      btn.addEventListener('mouseleave',()=>{ keys[key] = false; });
+    const bindHold = (btn, key) => {
+      const on = e => { e.preventDefault(); keys[key] = true; };
+      const off = e => { e.preventDefault(); keys[key] = false; };
+      btn.addEventListener('touchstart', on); btn.addEventListener('touchend', off);
+      btn.addEventListener('mousedown', on); btn.addEventListener('mouseup', off); btn.addEventListener('mouseleave', off);
     };
-    set(btnLeft, false, 'left');
-    set(btnRight, false, 'right');
+    bindHold(btnLeft, 'left'); bindHold(btnRight, 'right');
     btnPause.addEventListener('click', toggleRun);
   }
 
   btnStart.addEventListener('click', () => { ensureAudio(); toggleRun(); });
   btnRestart.addEventListener('click', () => { restart(); });
-
-  // Start loop
   requestAnimationFrame(loop);
-  // Auto start
   toggleRun();
 })();
